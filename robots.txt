@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://braenadam10.github.io/Smart-score-ai/sitemap.xml
