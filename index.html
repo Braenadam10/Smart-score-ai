@@ -1,223 +1,34 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="google-site-verification" content="SKRuv_S1XH57_0TyIojq8Xf-Yzxfs7EUCk8f0c9xgas" />
-  <title>Smart Score AI</title>
+<script>
+// TAMBAHAN BARU: Auto-suggest semua tim
+let timeoutSearch;
+document.getElementById("tim1").addEventListener("input", (e)=>suggest(e,1));
+document.getElementById("tim2").addEventListener("input", (e)=>suggest(e,2));
 
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      margin: 0;
-      background: #101827;
-      color: white;
-      text-align: center;
-    }
-
-    header {
-      background: #16a34a;
-      padding: 25px 15px;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 28px;
-    }
-
-    .subtitle {
-      margin-top: 8px;
-      opacity: 0.9;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: 30px auto;
-      padding: 20px;
-    }
-
-    .card {
-      background: #1f2937;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-    }
-
-    input {
-      width: 100%;
-      padding: 15px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-    }
-
-    button {
-      width: 100%;
-      padding: 15px;
-      margin-top: 10px;
-      background: #16a34a;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 17px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:disabled{opacity:0.6;cursor:not-allowed}
-
-    #hasil {
-      display: none;
-      margin-top: 25px;
-      background: #111827;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: left;
-    }
-
-    .score {
-      font-size: 30px;
-      color: #22c55e;
-      font-weight: bold;
-      text-align: center;
-    }
-    .team-row{display:flex;justify-content:space-around;align-items:center;margin:15px 0}
-    .team-row img{width:60px;height:60px;background:white;border-radius:50%;padding:5px;object-fit:contain}
-    .small{font-size:12px;color:#9ca3af;text-align:center;margin-top:10px}
-
-    footer {
-      margin-top: 40px;
-      padding: 20px;
-      color: #9ca3af;
-    }
-  </style>
-</head>
-    
-<body>
-
-  <header>
-    <h1>⚽ SMART SCORE AI</h1>
-    <div class="subtitle">Prediksi Skor Sepak Bola - Auto Statistik API</div>
-  </header>
-
-  <div class="container">
-    <div class="card">
-      <h2>Masukkan Nama Tim</h2>
-
-      <input type="text" id="tim1" placeholder="Nama Tim 1 contoh: Arsenal">
-      <input type="text" id="tim2" placeholder="Nama Tim 2 contoh: Chelsea">
-
-      <button id="btnPrediksi" onclick="prediksi()">🔮 Prediksi Skor Akurat</button>
-
-      <div id="hasil">
-        <div class="team-row">
-          <div style="text-align:center"><img id="logo1" src="" style="display:none"><br><span id="nama1"></span></div>
-          <div style="font-weight:bold">VS</div>
-          <div style="text-align:center"><img id="logo2" src="" style="display:none"><br><span id="nama2"></span></div>
-        </div>
-        <h2 id="pertandingan" style="text-align:center"></h2>
-        <p style="text-align:center">Prediksi skor:</p>
-        <div class="score" id="skor"></div>
-        <p id="analisis"></p>
-        <p class="small" id="sumber"></p>
-      </div>
-    </div>
-  </div>
-
-  <footer>
-    © 2026 Smart Score AI - Data Live from TheSportsDB
-  </footer>
-
-  <script>
-    async function getTeamData(namaTim){
-      try{
-        // 1. Cari tim untuk dapat ID & Logo
-        let res = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(namaTim)}`);
-        let json = await res.json();
-        if(!json.teams || json.teams.length==0) return null;
-        let team = json.teams[0];
-
-        // 2. Ambil 5 laga terakhir untuk hitung rata gol
-        let res2 = await fetch(`https://www.thesportsdb.com/api/v1/json/3/eventslast.php?id=${team.idTeam}`);
-        let json2 = await res2.json();
-        let last = json2.results || [];
-        
-        let totalGol = 0, main = 0;
-        last.forEach(m=>{
-          if(m.intHomeScore!==null && m.intAwayScore!==null){
-            main++;
-            if(m.strHomeTeam === team.strTeam) totalGol += parseInt(m.intHomeScore);
-            else totalGol += parseInt(m.intAwayScore);
-          }
-        });
-        let avg = main>0 ? totalGol/main : 1.35; // default kalau data kosong
-
-        return { name: team.strTeam, logo: team.strTeamBadge, avg: avg, matches: main };
-      }catch(e){ return null; }
-    }
-
-    async function prediksi() {
-      const tim1 = document.getElementById("tim1").value.trim();
-      const tim2 = document.getElementById("tim2").value.trim();
-      const btn = document.getElementById("btnPrediksi");
-
-      if (tim1 === "" || tim2 === "") {
-        alert("Masukkan nama kedua tim terlebih dahulu!");
-        return;
-      }
-
-      btn.disabled=true; btn.innerText="⏳ Mengambil data asli...";
-      document.getElementById("hasil").style.display = "block";
-      document.getElementById("pertandingan").innerText = "Mencari data "+tim1+" vs "+tim2+"...";
-      document.getElementById("skor").innerText = "...";
-      document.getElementById("analisis").innerText = "";
-
-      let d1 = await getTeamData(tim1);
-      let d2 = await getTeamData(tim2);
-
-      // Fallback kalau tidak ketemu di API, tetap jalan
-      if(!d1) d1 = {name: tim1, logo: "", avg: 1.4, matches: 0};
-      if(!d2) d2 = {name: tim2, logo: "", avg: 1.2, matches: 0};
-
-      // Tampilkan logo
-      if(d1.logo){ document.getElementById("logo1").src=d1.logo; document.getElementById("logo1").style.display="inline-block"; }
-      if(d2.logo){ document.getElementById("logo2").src=d2.logo; document.getElementById("logo2").style.display="inline-block"; }
-      document.getElementById("nama1").innerText = d1.name;
-      document.getElementById("nama2").innerText = d2.name;
-
-      // RUMUS AKURAT (bukan random) - Poisson
-      let homeAdv = 1.15;
-      let exp1 = (d1.avg * homeAdv) / ((d2.avg*0.5)+0.8);
-      let exp2 = (d2.avg) / ((d1.avg*0.5)+0.8);
-
-      let skor1 = Math.round(exp1);
-      let skor2 = Math.round(exp2);
-      // biar tidak 0-0 terus
-      if(skor1==0 && skor2==0) skor1=1;
-
-      let total = exp1+exp2+0.6;
-      let win1 = Math.round((exp1/total)*100);
-      let win2 = Math.round((exp2/total)*100);
-      let draw = 100 - win1 - win2;
-
-      document.getElementById("pertandingan").innerHTML = d1.name + " vs " + d2.name;
-      document.getElementById("skor").innerHTML = skor1 + " - " + skor2;
-      document.getElementById("analisis").innerHTML = 
-        `📊 <b>Data Asli:</b><br>
-        - ${d1.name}: ${d1.avg.toFixed(2)} gol/laga (dari ${d1.matches} laga terakhir)<br>
-        - ${d2.name}: ${d2.avg.toFixed(2)} gol/laga (dari ${d2.matches} laga terakhir)<br><br>
-        🔥 <b>Probabilitas:</b><br>
-        ${d1.name} Menang: ${win1}% | Seri: ${draw}% | ${d2.name} Menang: ${win2}%<br><br>
-        <i>Ini prediksi berbasis statistik asli, bukan random.</i>`;
-      
-      document.getElementById("sumber").innerText = "Sumber data: thesportsdb.com API (gratis, konsep sama kayak EA Score)";
-      btn.disabled=false; btn.innerText="🔮 Prediksi Skor Akurat";
-    }
-  </script>
-
-</body>
-</html>
+async function suggest(e, n){
+  clearTimeout(timeoutSearch);
+  let q = e.target.value;
+  if(q.length < 2) return;
+  timeoutSearch = setTimeout(async ()=>{
+    try{
+      let res = await fetch(`https://www.thesportsdb.com/api/v1/json/1/searchteams.php?t=${encodeURIComponent(q)}`);
+      let json = await res.json();
+      if(!json.teams) return;
+      // Buat list saran di bawah input
+      let listId = "list"+n;
+      let old = document.getElementById(listId);
+      if(old) old.remove();
+      let div = document.createElement("div");
+      div.id = listId;
+      div.style.cssText="background:white;color:black;border-radius:8px;max-height:150px;overflow:auto;text-align:left;margin-top:-5px";
+      json.teams.slice(0,5).forEach(t=>{
+        let item = document.createElement("div");
+        item.style.cssText="padding:8px 10px;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid #eee";
+        item.innerHTML=`<img src="${t.strTeamBadge}" style="width:25px;height:25px"> ${t.strTeam} - ${t.strCountry}`;
+        item.onclick=()=>{document.getElementById("tim"+n).value=t.strTeam; div.remove();};
+        div.appendChild(item);
+      });
+      document.getElementById("tim"+n).after(div);
+    }catch(e){}
+  }, 400);
+}
+</script>
