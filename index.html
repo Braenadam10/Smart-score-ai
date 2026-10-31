@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="google-site-verification" content="SKRuv_S1XH57_0TyIojq8Xf-Yzxfs7EUCk8f0c9xgas" />
   <title>Smart Score AI</title>
   <style>
     *{box-sizing:border-box;font-family:Arial,sans-serif}
@@ -18,17 +17,15 @@
     .score{font-size:32px;color:#22c55e;font-weight:bold;text-align:center}
     .team-row{display:flex;justify-content:space-around;align-items:center}
     .team-row img{width:65px;height:65px;background:white;border-radius:50%;padding:5px;object-fit:contain}
-    .small{font-size:11px;color:#9ca3af;text-align:center;margin-top:12px}
-    footer{margin-top:40px;padding:20px;color:#9ca3af}
   </style>
 </head>
 <body>
-<header><h1>⚽ SMART SCORE AI</h1><div>Prediksi Berbasis Statistik Asli</div></header>
+<header><h1>⚽ SMART SCORE AI</h1><div>Final Version - Anti Imbang</div></header>
 <div class="container">
   <div class="card">
     <h2>Masukkan Nama Tim</h2>
     <input id="tim1" placeholder="Tim 1: Chelsea">
-    <input id="tim2" placeholder="Tim 2: Manchester United">
+    <input id="tim2" placeholder="Tim 2: Man United">
     <button onclick="prediksi()">🔮 Prediksi Skor Akurat</button>
     <div id="hasil">
       <div class="team-row">
@@ -37,68 +34,55 @@
         <div style="text-align:center"><img id="logo2" style="display:none"><br><b id="nama2"></b></div>
       </div>
       <h2 id="pertandingan" style="text-align:center"></h2>
-      <p style="text-align:center">Prediksi skor:</p>
       <div class="score" id="skor"></div>
       <p id="analisis"></p>
-      <p class="small">Data asli musim 2025/26 + Logo live dari API</p>
     </div>
   </div>
 </div>
-<footer>© 2026 Smart Score AI</footer>
 <script>
-// DATABASE ASLI 2025/26 - TIDAK PERNAH 0 LAGA LAGI
 const DB = {
-  "chelsea": {avg:1.85, logo:"https://www.thesportsdb.com/images/media/team/badge/3ayl2w1478887573.png"},
-  "manchester united": {avg:1.65, logo:"https://www.thesportsdb.com/images/media/team/badge/xzqdr11509987110.png"},
-  "man united": {avg:1.65, logo:"https://www.thesportsdb.com/images/media/team/badge/xzqdr11509987110.png"},
-  "arsenal": {avg:2.15, logo:"https://www.thesportsdb.com/images/media/team/badge/uyhbfe1612467038.png"},
-  "manchester city": {avg:2.31, logo:"https://www.thesportsdb.com/images/media/team/badge/rwuplt1478887965.png"},
-  "man city": {avg:2.31, logo:"https://www.thesportsdb.com/images/media/team/badge/rwuplt1478887965.png"},
-  "liverpool": {avg:2.21, logo:"https://www.thesportsdb.com/images/media/team/badge/uvxuqq1448813173.png"},
-  "tottenham": {avg:1.92, logo:"https://www.thesportsdb.com/images/media/team/badge/v0rthx1448813213.png"},
-  "barcelona": {avg:2.45, logo:"https://www.thesportsdb.com/images/media/team/badge/vrhrks1478887112.png"},
-  "real madrid": {avg:2.28, logo:"https://www.thesportsdb.com/images/media/team/badge/1n0myy1478887116.png"},
-  "persib": {avg:1.75, logo:""},
-  "persija": {avg:1.55, logo:""},
-  "arema": {avg:1.45, logo:""}
+  "chelsea":{avg:1.85}, "manchester united":{avg:1.65}, "man united":{avg:1.65},
+  "arsenal":{avg:2.15}, "manchester city":{avg:2.31}, "man city":{avg:2.31},
+  "liverpool":{avg:2.21}, "barcelona":{avg:2.45}, "real madrid":{avg:2.28},
+  "persib":{avg:1.75}, "persija":{avg:1.55}, "arema":{avg:1.45}, "tottenham":{avg:1.92}
 };
-
 async function getTeam(nama){
-  let key = nama.toLowerCase().trim();
-  let data = DB[key] || {avg:1.55, logo:""};
-  // coba ambil logo live kalau tidak ada di DB
-  if(!data.logo){
-    try{
-      let r = await fetch(`https://www.thesportsdb.com/api/v1/json/1/searchteams.php?t=${encodeURIComponent(nama)}`);
-      let j = await r.json();
-      if(j.teams && j.teams[0].strTeamBadge) data.logo = j.teams[0].strTeamBadge;
-    }catch(e){}
-  }
-  return {name: nama, avg: data.avg, logo: data.logo};
+  let key=nama.toLowerCase().trim();
+  let avg=(DB[key]?.avg)||1.55;
+  let logo="";
+  try{
+    let r=await fetch(`https://www.thesportsdb.com/api/v1/json/1/searchteams.php?t=${encodeURIComponent(nama)}`);
+    let j=await r.json();
+    if(j.teams) logo=j.teams[0].strTeamBadge;
+  }catch(e){}
+  return {name:nama, avg:avg, logo:logo};
 }
-
 async function prediksi(){
-  let t1 = document.getElementById("tim1").value.trim();
-  let t2 = document.getElementById("tim2").value.trim();
+  let t1=document.getElementById("tim1").value.trim();
+  let t2=document.getElementById("tim2").value.trim();
   if(!t1||!t2){alert("Isi 2 tim!");return;}
   document.getElementById("hasil").style.display="block";
-  document.getElementById("pertandingan").innerText="Menghitung...";
-  let d1 = await getTeam(t1), d2 = await getTeam(t2);
-  
+  let d1=await getTeam(t1), d2=await getTeam(t2);
   if(d1.logo){let l=document.getElementById("logo1"); l.src=d1.logo; l.style.display="inline-block";}
   if(d2.logo){let l=document.getElementById("logo2"); l.src=d2.logo; l.style.display="inline-block";}
-  document.getElementById("nama1").innerText=d1.name; document.getElementById("nama2").innerText=d2.name;
+  document.getElementById("nama1").innerText=d1.name;
+  document.getElementById("nama2").innerText=d2.name;
 
-  let exp1 = (d1.avg*1.18)/((d2.avg*0.45)+0.7);
-  let exp2 = (d2.avg)/((d1.avg*0.45)+0.7);
+  // RUMUS BARU ANTI IMBANG
+  let exp1=(d1.avg*1.25)/((d2.avg*0.40)+0.60);
+  let exp2=(d2.avg*0.90)/((d1.avg*0.40)+0.60);
+  let hash=(d1.name+d2.name).split('').reduce((a,b)=>a+b.charCodeAt(0),0);
+  exp1+= (hash%4)/10; // variasi 0 - 0.3
+
   let s1=Math.round(exp1), s2=Math.round(exp2);
-  if(s1==0&&s2==0)s1=1;
-
-  let tot=exp1+exp2+0.6, w1=Math.round(exp1/tot*100), w2=Math.round(exp2/tot*100), dr=100-w1-w2;
+  if(s1===s2){ // kalau masih imbang, paksa beda 1 gol
+    if(exp1>=exp2) s1+=1; else s2+=1;
+  }
+  if(s1===0&&s2===0) s1=1;
 
   document.getElementById("pertandingan").innerHTML=d1.name+" vs "+d2.name;
   document.getElementById("skor").innerHTML=s1+" - "+s2;
-  document.getElementById("analisis").innerHTML=`📊 <b>Data Asli:</b><br>- ${d1.name}: ${d1.avg.toFixed(2)} gol/laga (dari 5 laga terakhir)<br>- ${d2.name}: ${d2.avg.toFixed(2)} gol/laga (dari 5 laga terakhir)<br><br>🔥 <b>Probabilitas:</b><br>${d1.name} Menang: ${w1}% | Seri: ${dr}% | ${d2.name} Menang: ${w2}%<br><br><i>Ini prediksi berbasis statistik asli musim 2025/26, bukan random.</i>`;
+  document.getElementById("analisis").innerHTML=`- ${d1.name}: ${d1.avg.toFixed(2)} gol/laga<br>- ${d2.name}: ${d2.avg.toFixed(2)} gol/laga<br><br>Prediksi tidak akan 1-1 terus. Ada Home Advantage.`;
 }
 </script>
 </body>
