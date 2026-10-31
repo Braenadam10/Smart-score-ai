@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Score AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #101827;
+      color: white;
+      text-align: center;
+    }
+
+    header {
+      background: #16a34a;
+      padding: 25px 15px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: #1f2937;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    }
+
+    input {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      margin-top: 10px;
+      background: #16a34a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #hasil {
+      display: none;
+      margin-top: 25px;
+      background: #111827;
+      padding: 20px;
+      border-radius: 12px;
+    }
+
+    .score {
+      font-size: 30px;
+      color: #22c55e;
+      font-weight: bold;
+    }
+
+    footer {
+      margin-top: 40px;
+      padding: 20px;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>⚽ SMART SCORE AI</h1>
+    <div class="subtitle">Prediksi Skor Sepak Bola</div>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2>Masukkan Nama Tim</h2>
+
+      <input type="text" id="tim1" placeholder="Nama Tim 1">
+      <input type="text" id="tim2" placeholder="Nama Tim 2">
+
+      <button onclick="prediksi()">🔮 Prediksi Skor</button>
+
+      <div id="hasil">
+        <h2 id="pertandingan"></h2>
+        <p>Prediksi skor:</p>
+        <div class="score" id="skor"></div>
+        <p id="analisis"></p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    © 2026 Smart Score AI
+  </footer>
+
+  <script>
+    function prediksi() {
+      const tim1 = document.getElementById("tim1").value;
+      const tim2 = document.getElementById("tim2").value;
+
+      if (tim1 === "" || tim2 === "") {
+        alert("Masukkan nama kedua tim terlebih dahulu!");
+        return;
+      }
+
+      const skor1 = Math.floor(Math.random() * 4);
+      const skor2 = Math.floor(Math.random() * 4);
+
+      document.getElementById("pertandingan").innerHTML =
+        tim1 + " vs " + tim2;
+
+      document.getElementById("skor").innerHTML =
+        skor1 + " - " + skor2;
+
+      document.getElementById("analisis").innerHTML =
+        "Ini adalah prediksi simulasi Smart Score AI.";
+
+      document.getElementById("hasil").style.display = "block";
+    }
+  </script>
+
+</body>
+</html>
+
+HTML
